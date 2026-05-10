@@ -4,7 +4,7 @@ import { can } from '../modules/auth/rbac.js';
 import { computeAIScoring } from '../modules/ai/policies.js';
 import { buildArchiveSearchQuery } from '../modules/search/elasticsearch.js';
 import { create, list, update, remove } from '../modules/store/memory-store.js';
-import { queueAIJob, runAIJob, getAIInsights } from '../modules/ai/engine.js';
+import { queueAIJob, runAIJob, getAIInsights, analyzeDocument, getAIRecommendations } from '../modules/ai/engine.js';
 import { toVector, cosine } from '../modules/ai/semantic.js';
 
 test('rbac permission check works', () => {
@@ -33,7 +33,10 @@ test('ai infrastructure pipeline works', () => {
   const job = queueAIJob('DOC-1', 'embedding');
   const result = runAIJob(job.id);
   assert.ok(result?.insight.documentId === 'DOC-1');
+  const manual = analyzeDocument('DOC-M', 'Finance budget report for Ministry');
+  assert.equal(manual.classification, 'FINANCE');
   assert.ok(getAIInsights().length > 0);
+  assert.ok(getAIRecommendations().length > 0);
   const a = toVector('archive');
   const b = toVector('archival');
   assert.ok(cosine(a, b) > 0.8);

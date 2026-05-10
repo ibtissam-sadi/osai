@@ -9,7 +9,7 @@ import { predictRetentionWindow } from './modules/documents/retention.js';
 import { buildArchiveSearchQuery } from './modules/search/elasticsearch.js';
 import { list, create, update, remove, type Entity } from './modules/store/memory-store.js';
 import { buildApprovalChain } from './modules/workflows/approval.js';
-import { queueAIJob, runAIJob, getAIJobs, getAIInsights } from './modules/ai/engine.js';
+import { queueAIJob, runAIJob, getAIJobs, getAIInsights, analyzeDocument, getAIRecommendations } from './modules/ai/engine.js';
 import { toVector, cosine } from './modules/ai/semantic.js';
 
 const send = (res: http.ServerResponse, code: number, payload: unknown) => {
@@ -62,6 +62,14 @@ const server = http.createServer(async (req, res) => {
     return send(res, 200, runAIJob(parts[5]) || { error: 'not_found' });
   }
   if (url.pathname === '/api/v1/ai/insights') return send(res, 200, getAIInsights());
+
+  if (url.pathname === '/api/v1/ai/analyze' && req.method === 'POST') {
+    const body = await readBody(req) as { documentId?: string; text?: string };
+    return send(res, 200, analyzeDocument(body.documentId || 'DOC-NEW', body.text || 'General archive text'));
+  }
+  if (url.pathname === '/api/v1/ai/recommendations' && req.method === 'GET') {
+    return send(res, 200, getAIRecommendations());
+  }
   if (url.pathname === '/api/v1/ai/vectorize') {
     const q = url.searchParams.get('q') || 'archive';
     const compare = url.searchParams.get('compare') || 'records';

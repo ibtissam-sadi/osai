@@ -1,15 +1,14 @@
 # OSAI — AI Smart Archive Operating System
 
-## Backend + AI infrastructure now included
-- Security-hardened API runtime with CORS, rate limits, and graceful shutdown.
-- Core CRUD APIs for documents, workflows, and organizations.
-- AI infrastructure APIs:
-  - `GET/POST /api/v1/ai/jobs`
-  - `POST /api/v1/ai/jobs/:id/run`
-  - `GET /api/v1/ai/insights`
-  - `GET /api/v1/ai/vectorize?q=...&compare=...`
-- AI modules now include job queueing, execution, insights generation, embeddings, and similarity scoring.
-- Full web OS module pages remain available and linked.
+## AI backend infrastructure (fully wired)
+- AI Analysis API: `POST /api/v1/ai/analyze`
+- AI Job orchestration: `GET/POST /api/v1/ai/jobs`, `POST /api/v1/ai/jobs/:id/run`
+- AI outputs: `GET /api/v1/ai/insights`, `GET /api/v1/ai/recommendations`
+- Semantic/vector API: `GET /api/v1/ai/vectorize?q=...&compare=...`
+- AI internals include classification, summary generation, duplicate hinting, risk/compliance scoring, entities extraction, and recommendation generation.
+
+## Web AI center
+- `app/ai-command-center` now executes live analyze and queue/run operations against API and displays real results.
 
 ## Run
 ```bash
