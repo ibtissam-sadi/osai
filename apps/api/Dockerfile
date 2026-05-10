@@ -1,6 +1,7 @@
 FROM node:20-alpine
 WORKDIR /app
-COPY package.json ./
+COPY package.json tsconfig.json ./
 COPY src ./src
+RUN npm install
 EXPOSE 4000
-CMD ["node", "src/server.js"]
+CMD ["npm", "run", "dev"]
