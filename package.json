@@ -4,6 +4,9 @@
   "workspaces": ["apps/*", "services/*"],
   "scripts": {
     "test": "npm run test -w apps/api",
-    "build": "npm run build -w apps/api && npm run build -w apps/web"
+    "build": "npm run build -w apps/api && npm run build -w apps/web",
+    "dev:api": "npm run dev -w apps/api",
+    "dev:web": "npm run dev -w apps/web",
+    "smoke": "bash scripts/smoke.sh http://localhost:4000"
   }
 }
