@@ -1,0 +1,256 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ORG_ADMIN
+  RECORDS_MANAGER
+  ARCHIVIST
+  COMPLIANCE_OFFICER
+  AUDITOR
+  DEPARTMENT_HEAD
+  REVIEWER
+  USER
+}
+
+enum DocumentStatus {
+  DRAFT
+  ACTIVE
+  REVIEW
+  ARCHIVED
+  PENDING_DESTRUCTION
+  DESTROYED
+  PRESERVED_PERMANENTLY
+}
+
+enum WorkflowStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ESCALATED
+  COMPLETED
+}
+
+model Organization {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  nameAr           String
+  nameFr           String
+  nameEn           String
+  legalType        String
+  tenantKey        String   @unique
+  branches         Branch[]
+  departments      Department[]
+  users            User[]
+  documents        Document[]
+  retentionPolicies RetentionPolicy[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Branch {
+  id             String @id @default(cuid())
+  organizationId String
+  parentBranchId String?
+  code           String
+  name           String
+  city           String?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  parentBranch   Branch? @relation("BranchHierarchy", fields: [parentBranchId], references: [id])
+  childBranches  Branch[] @relation("BranchHierarchy")
+  departments    Department[]
+  @@unique([organizationId, code])
+}
+
+model Department {
+  id             String @id @default(cuid())
+  organizationId String
+  branchId       String?
+  parentDeptId   String?
+  code           String
+  name           String
+  division       String?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  branch         Branch? @relation(fields: [branchId], references: [id])
+  parentDept     Department? @relation("DepartmentHierarchy", fields: [parentDeptId], references: [id])
+  subDepartments Department[] @relation("DepartmentHierarchy")
+  users          User[]
+  documents      Document[]
+  @@unique([organizationId, code])
+}
+
+model User {
+  id               String @id @default(cuid())
+  organizationId   String
+  departmentId     String?
+  email            String @unique
+  fullName         String
+  passwordHash     String
+  mfaEnabled       Boolean @default(false)
+  mfaSecretRef     String?
+  role             Role
+  accessLevel      Int @default(1)
+  isActive         Boolean @default(true)
+  lastLoginAt      DateTime?
+  organization     Organization @relation(fields: [organizationId], references: [id])
+  department       Department? @relation(fields: [departmentId], references: [id])
+  sessions         UserSession[]
+  auditLogs        AuditLog[]
+  approvals        WorkflowStep[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model UserSession {
+  id             String @id @default(cuid())
+  userId         String
+  refreshTokenHash String
+  ipAddress      String
+  userAgent      String
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  user           User @relation(fields: [userId], references: [id])
+}
+
+model Category {
+  id             String @id @default(cuid())
+  organizationId String
+  code           String
+  name           String
+  metadataSchema Json
+  documents      Document[]
+  @@unique([organizationId, code])
+}
+
+model RetentionPolicy {
+  id             String @id @default(cuid())
+  organizationId String
+  code           String
+  title          String
+  retentionYears Int
+  legalBasis     String
+  archiveAfterDays Int
+  destructionReviewDays Int
+  requiresHumanApproval Boolean @default(true)
+  documents      Document[]
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  @@unique([organizationId, code])
+}
+
+model Document {
+  id                  String @id @default(cuid())
+  organizationId      String
+  departmentId        String?
+  categoryId          String?
+  retentionPolicyId   String?
+  title               String
+  description         String?
+  language            String
+  status              DocumentStatus @default(DRAFT)
+  metadata            Json
+  tags                String[]
+  checksumSha256      String
+  currentVersionId    String?
+  isEncrypted         Boolean @default(false)
+  encryptionKeyRef    String?
+  riskScore           Float?
+  complianceScore     Float?
+  duplicateClusterId  String?
+  organization        Organization @relation(fields: [organizationId], references: [id])
+  department          Department? @relation(fields: [departmentId], references: [id])
+  category            Category? @relation(fields: [categoryId], references: [id])
+  retentionPolicy     RetentionPolicy? @relation(fields: [retentionPolicyId], references: [id])
+  versions            FileVersion[]
+  analyses            DocumentAIAnalysis[]
+  workflows           Workflow[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model FileVersion {
+  id             String @id @default(cuid())
+  documentId     String
+  versionNumber  Int
+  storageProvider String
+  storagePath    String
+  fileSize       Int
+  mimeType       String
+  uploadedById   String
+  ocrText        String?
+  createdAt      DateTime @default(now())
+  document       Document @relation(fields: [documentId], references: [id])
+  @@unique([documentId, versionNumber])
+}
+
+model AIEngine {
+  id                String @id @default(cuid())
+  name              String
+  provider          String
+  modelVersion      String
+  supportsArabic    Boolean @default(true)
+  supportsFrench    Boolean @default(true)
+  supportsEnglish   Boolean @default(true)
+  config            Json
+  analyses          DocumentAIAnalysis[]
+}
+
+model DocumentAIAnalysis {
+  id                String @id @default(cuid())
+  documentId        String
+  aiEngineId        String
+  summary           String?
+  classification    String?
+  extractedEntities Json?
+  complianceFlags   Json?
+  anomalyScore      Float?
+  predictiveScore   Float?
+  embeddingVector   Unsupported("vector")?
+  nlpIndexId        String?
+  createdAt         DateTime @default(now())
+  document          Document @relation(fields: [documentId], references: [id])
+  aiEngine          AIEngine @relation(fields: [aiEngineId], references: [id])
+}
+
+model Workflow {
+  id             String @id @default(cuid())
+  documentId     String
+  type           String
+  status         WorkflowStatus @default(PENDING)
+  initiatedById  String
+  dueAt          DateTime?
+  steps          WorkflowStep[]
+  document       Document @relation(fields: [documentId], references: [id])
+}
+
+model WorkflowStep {
+  id             String @id @default(cuid())
+  workflowId     String
+  approverId     String
+  orderIndex     Int
+  status         WorkflowStatus @default(PENDING)
+  comment        String?
+  actedAt        DateTime?
+  workflow       Workflow @relation(fields: [workflowId], references: [id])
+  approver       User @relation(fields: [approverId], references: [id])
+}
+
+model AuditLog {
+  id             String @id @default(cuid())
+  userId         String?
+  eventType      String
+  resourceType   String
+  resourceId     String?
+  action         String
+  details        Json?
+  ipAddress      String?
+  traceId        String?
+  createdAt      DateTime @default(now())
+  user           User? @relation(fields: [userId], references: [id])
+  @@index([eventType, createdAt])
+}
