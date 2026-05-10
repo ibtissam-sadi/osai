@@ -1,0 +1,9 @@
+{
+  "name": "osai-monorepo",
+  "private": true,
+  "workspaces": ["apps/*", "services/*"],
+  "scripts": {
+    "test": "npm run test -w apps/api",
+    "build": "npm run build -w apps/api && npm run build -w apps/web"
+  }
+}
