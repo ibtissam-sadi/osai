@@ -2,6 +2,14 @@
 
 AI-first, enterprise archival operating system blueprint for Algerian institutions.
 
+## Production-readiness upgrades
+- Security headers + CORS controls + in-memory API rate limiting
+- Graceful shutdown handlers for API containers
+- Environment validation for production secrets
+- Multi-stage Docker builds for API and Web runtime images
+- Docker Compose health checks and restart policies
+- CI execution for API test workflow
+
 ## Implemented foundation
 - Multi-tenant archival data model via Prisma + PostgreSQL
 - JWT auth primitives + RBAC matrix
@@ -10,17 +18,9 @@ AI-first, enterprise archival operating system blueprint for Algerian institutio
 - Workflow approval chain engine scaffolding
 - Retention prediction utility scaffolding
 - Full web shell modules: dashboard, archive explorer, AI center, workflows, compliance, organization, analytics
-- Dockerized platform services (web, api, postgres, redis, elasticsearch)
 
 ## Run
 ```bash
 cp .env.example .env
 docker compose up -d --build
 ```
-
-## Main paths
-- `prisma/schema.prisma` — enterprise data model
-- `apps/api/src` — API and domain modules
-- `apps/web/app` — Next.js enterprise UI modules
-- `services/*` — worker services (AI/search/workflow)
-- `docs/*` — architecture and AI design notes
