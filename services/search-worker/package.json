@@ -1,0 +1,6 @@
+{
+  "name": "osai-search-worker",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node src/index.ts" }
+}
