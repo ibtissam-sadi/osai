@@ -8,5 +8,7 @@ JOB_ID=$(curl -fsS -X POST "$API_BASE/api/v1/ai/jobs" -H 'Content-Type: applicat
 curl -fsS -X POST "$API_BASE/api/v1/ai/jobs/$JOB_ID/run" >/dev/null
 curl -fsS "$API_BASE/api/v1/ai/insights" >/dev/null
 curl -fsS "$API_BASE/api/v1/ai/recommendations" >/dev/null
+curl -fsS "$API_BASE/api/v1/ai/models" >/dev/null
+curl -fsS -X POST "$API_BASE/api/v1/ai/models/activate" -H 'Content-Type: application/json' -d '{"task":"embedding","modelId":"openai-text-embedding-3-large"}' >/dev/null
 curl -fsS "$API_BASE/api/v1/ai/vectorize?q=archive&compare=records" >/dev/null
 echo "OSAI API smoke test passed"

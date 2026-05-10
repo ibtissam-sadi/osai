@@ -1,4 +1,5 @@
 import { toVector, cosine } from './semantic.js';
+import { getActiveModels } from './model-registry.js';
 
 export interface AIJob {
   id: string;
@@ -16,6 +17,7 @@ export interface AIInsight {
   riskScore: number;
   complianceScore: number;
   entities: string[];
+  modelsUsed: Record<string, string>;
 }
 
 const jobs: AIJob[] = [];
@@ -39,7 +41,8 @@ export const analyzeDocument = (documentId: string, text: string) => {
     duplicateOf: duplicate?.documentId,
     riskScore: Math.round((cls === 'MEDICAL' ? 0.35 : 0.2) * 100) / 100,
     complianceScore: Math.round((cls === 'GENERAL' ? 0.96 : 0.88) * 100) / 100,
-    entities: Array.from(new Set((text.match(/[A-Z][a-z]+/g) || []).slice(0, 5)))
+    entities: Array.from(new Set((text.match(/[A-Z][a-z]+/g) || []).slice(0, 5))),
+    modelsUsed: getActiveModels()
   };
   insights.push(insight);
   return insight;

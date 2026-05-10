@@ -11,6 +11,7 @@ import { list, create, update, remove, type Entity } from './modules/store/memor
 import { buildApprovalChain } from './modules/workflows/approval.js';
 import { queueAIJob, runAIJob, getAIJobs, getAIInsights, analyzeDocument, getAIRecommendations } from './modules/ai/engine.js';
 import { toVector, cosine } from './modules/ai/semantic.js';
+import { listModels, getActiveModels, setActiveModel } from './modules/ai/model-registry.js';
 
 const send = (res: http.ServerResponse, code: number, payload: unknown) => {
   res.statusCode = code;
@@ -78,6 +79,13 @@ const server = http.createServer(async (req, res) => {
   }
   if (url.pathname === '/api/v1/ai/recommendations' && req.method === 'GET') {
     return send(res, 200, getAIRecommendations());
+  }
+
+  if (url.pathname === '/api/v1/ai/models' && req.method === 'GET') return send(res, 200, { options: listModels(), active: getActiveModels() });
+  if (url.pathname === '/api/v1/ai/models/activate' && req.method === 'POST') {
+    const body = await readBody(req) as { task?: string; modelId?: string };
+    const result = setActiveModel(body.task || 'chat', body.modelId || 'openai-gpt-4.1');
+    return send(res, result ? 200 : 400, result || { error: 'invalid_model_for_task' });
   }
   if (url.pathname === '/api/v1/ai/vectorize') {
     const q = url.searchParams.get('q') || 'archive';

@@ -6,6 +6,7 @@ import { buildArchiveSearchQuery } from '../modules/search/elasticsearch.js';
 import { create, list, update, remove } from '../modules/store/memory-store.js';
 import { queueAIJob, runAIJob, getAIInsights, analyzeDocument, getAIRecommendations } from '../modules/ai/engine.js';
 import { toVector, cosine } from '../modules/ai/semantic.js';
+import { listModels, setActiveModel, getActiveModels } from '../modules/ai/model-registry.js';
 
 test('rbac permission check works', () => {
   assert.equal(can('ARCHIVIST', 'search:read'), true);
@@ -40,4 +41,13 @@ test('ai infrastructure pipeline works', () => {
   const a = toVector('archive');
   const b = toVector('archival');
   assert.ok(cosine(a, b) > 0.8);
+});
+
+
+test('model registry supports api and pretrained options', () => {
+  const models = listModels();
+  assert.ok(models.some((m) => m.mode === 'api'));
+  assert.ok(models.some((m) => m.mode === 'pretrained'));
+  assert.ok(setActiveModel('embedding', 'openai-text-embedding-3-large'));
+  assert.equal(getActiveModels().embedding, 'openai-text-embedding-3-large');
 });
