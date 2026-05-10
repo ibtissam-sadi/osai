@@ -1,18 +1,18 @@
 import { LayoutShell } from '../../components/layout-shell';
-import { DataTable } from '../../components/data-table';
+import { CrudTable } from '../../components/crud/crud-table';
 
 export default function WorkflowsPage() {
   return (
     <LayoutShell
       title="Workflow Manager"
-      description="Configure and supervise approval chains, routing, SLA timers, and transfer operations."
+      description="Create, update, and delete workflow steps and approval assignments."
     >
-      <DataTable
-        headers={['Workflow', 'Document', 'Current Step', 'Due', 'Status']}
-        rows={[
-          ['WF-1001', 'Budget 2025', 'Compliance Review', '2026-05-12', 'Pending'],
-          ['WF-1002', 'Recruitment Plan', 'Department Head', '2026-05-11', 'Escalated'],
-          ['WF-1003', 'Medical SOP', 'Org Admin', '2026-05-13', 'In Progress']
+      <CrudTable
+        title="Workflow Items"
+        fields={['document', 'currentStep', 'due', 'status']}
+        initialRows={[
+          { id: 'WF-1001', document: 'Budget 2025', currentStep: 'Compliance Review', due: '2026-05-12', status: 'Pending' },
+          { id: 'WF-1002', document: 'Recruitment Plan', currentStep: 'Department Head', due: '2026-05-11', status: 'Escalated' }
         ]}
       />
     </LayoutShell>

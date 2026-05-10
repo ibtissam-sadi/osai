@@ -4,14 +4,12 @@ AI-first, enterprise archival operating system blueprint for Algerian institutio
 
 ## What is usable now
 - API service with security middleware, CORS, rate limiting, and operational endpoints.
-- Full web OS shell with all major centers fully routed:
-  - Enterprise Dashboard
-  - Archive Explorer (search/table UI)
-  - AI Command Center (pipeline KPIs)
-  - Workflow Manager (operations table)
-  - Compliance Monitoring Center
-  - Organization Hierarchy Manager
-  - Analytics Center
+- Full web OS shell with all major centers fully routed and linked.
+- In-web CRUD interactions available now for:
+  - Archive documents (`/archive-explorer`)
+  - Workflow items (`/workflows`)
+  - Organization units (`/organization`)
+- Dashboard quick-action buttons link to every major module page.
 - Infrastructure stack with PostgreSQL, Redis, Elasticsearch, API, and Web via Docker Compose.
 - API unit tests and CI validation workflow.
 - One-command smoke test to verify API readiness.
