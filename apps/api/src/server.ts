@@ -9,6 +9,8 @@ import { predictRetentionWindow } from './modules/documents/retention.js';
 import { buildArchiveSearchQuery } from './modules/search/elasticsearch.js';
 import { list, create, update, remove, type Entity } from './modules/store/memory-store.js';
 import { buildApprovalChain } from './modules/workflows/approval.js';
+import { queueAIJob, runAIJob, getAIJobs, getAIInsights } from './modules/ai/engine.js';
+import { toVector, cosine } from './modules/ai/semantic.js';
 
 const send = (res: http.ServerResponse, code: number, payload: unknown) => {
   res.statusCode = code;
@@ -49,6 +51,24 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === '/api/v1/retention/predict') return send(res, 200, predictRetentionWindow(url.searchParams.get('category') || 'general', url.searchParams.get('legalBasis') || '88-09'));
   if (url.pathname === '/api/v1/rbac/check') return send(res, 200, { allowed: can((url.searchParams.get('role') || 'USER') as Parameters<typeof can>[0], url.searchParams.get('permission') || 'search:read') });
   if (url.pathname === '/api/v1/audit/event') return send(res, 200, createAuditEvent({ actorId: 'demo-user', action: 'DOCUMENT_READ', resourceType: 'Document', resourceId: 'doc-001', ipAddress: ip }));
+
+  if (url.pathname === '/api/v1/ai/jobs' && req.method === 'GET') return send(res, 200, getAIJobs());
+  if (url.pathname === '/api/v1/ai/jobs' && req.method === 'POST') {
+    const body = await readBody(req) as { documentId?: string; type?: 'ocr' | 'classification' | 'embedding' | 'compliance' | 'anomaly' };
+    return send(res, 201, queueAIJob(body.documentId || 'DOC-001', body.type || 'ocr'));
+  }
+  if (url.pathname.startsWith('/api/v1/ai/jobs/') && req.method === 'POST' && url.pathname.endsWith('/run')) {
+    const parts = url.pathname.split('/');
+    return send(res, 200, runAIJob(parts[5]) || { error: 'not_found' });
+  }
+  if (url.pathname === '/api/v1/ai/insights') return send(res, 200, getAIInsights());
+  if (url.pathname === '/api/v1/ai/vectorize') {
+    const q = url.searchParams.get('q') || 'archive';
+    const compare = url.searchParams.get('compare') || 'records';
+    const v1 = toVector(q);
+    const v2 = toVector(compare);
+    return send(res, 200, { vector: v1, similarity: cosine(v1, v2) });
+  }
 
   const bucket = url.pathname.match(/^\/api\/v1\/(documents|workflows|organizations)$/)?.[1] as 'documents' | 'workflows' | 'organizations' | undefined;
   if (bucket && req.method === 'GET') return send(res, 200, list(bucket));
