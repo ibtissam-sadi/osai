@@ -1,13 +1,20 @@
+import { LayoutShell } from '../../components/layout-shell';
+import { DataTable } from '../../components/data-table';
+
 export default function OrganizationPage() {
   return (
-    <main>
-      <h2>Organization Hierarchy Manager</h2>
-      <p>Model institutions, branches, departments, divisions, roles and inherited permissions.</p>
-      <ul>
-        <li>Tenant-level governance controls</li>
-        <li>Delegated admin patterns</li>
-        <li>Role audit and access recertification</li>
-      </ul>
-    </main>
+    <LayoutShell
+      title="Organization Hierarchy Manager"
+      description="Manage institutions, branches, departments, divisions, and inherited RBAC permissions."
+    >
+      <DataTable
+        headers={['Org', 'Branch', 'Department', 'Admin', 'Users']}
+        rows={[
+          ['Ministry of Finance', 'Algiers HQ', 'Archive Ops', 'N. Haddad', '342'],
+          ['Municipality Oran', 'Central Office', 'Civil Registry', 'S. Benali', '128'],
+          ['National Hospital', 'East Wing', 'Medical Records', 'A. Kouider', '211']
+        ]}
+      />
+    </LayoutShell>
   );
 }

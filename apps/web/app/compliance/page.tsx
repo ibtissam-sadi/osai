@@ -1,13 +1,18 @@
+import { LayoutShell } from '../../components/layout-shell';
+
 export default function CompliancePage() {
   return (
-    <main>
-      <h2>Compliance Monitoring Center</h2>
-      <p>Track policy adherence for Algerian laws and international archival/security standards.</p>
+    <LayoutShell
+      title="Compliance Monitoring Center"
+      description="Live compliance oversight for Algerian legal obligations and ISO/OAIS archival standards."
+    >
       <ul>
-        <li>Law 88-09 retention/destruction controls</li>
-        <li>Law 18-07 privacy and access controls</li>
-        <li>ISO 15489 / 27001 / 30301 and OAIS checkpoints</li>
+        <li>Law 88-09: retention and destruction controls active</li>
+        <li>Law 18-07: access and privacy policy checks active</li>
+        <li>ISO 15489: records lifecycle controls tracked</li>
+        <li>ISO 27001: security event and control mapping tracked</li>
+        <li>ISO 30301 + OAIS: governance and preservation checkpoints tracked</li>
       </ul>
-    </main>
+    </LayoutShell>
   );
 }

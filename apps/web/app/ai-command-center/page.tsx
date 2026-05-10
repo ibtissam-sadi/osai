@@ -1,13 +1,18 @@
+import { LayoutShell } from '../../components/layout-shell';
+import { Card } from '../../components/card';
+
 export default function AICommandCenterPage() {
   return (
-    <main>
-      <h2>AI Command Center</h2>
-      <p>Control OCR, classification, duplicate detection, summarization and risk/compliance scoring pipelines.</p>
-      <ul>
-        <li>AI engine health and queue throughput</li>
-        <li>Model version governance and fallback policy</li>
-        <li>Human-in-the-loop review thresholds</li>
-      </ul>
-    </main>
+    <LayoutShell
+      title="AI Command Center"
+      description="Monitor OCR, NLP, classification, anomaly detection, and compliance scoring across institutions."
+    >
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+        <Card title="OCR Queue" value="1,228" subtitle="jobs pending" />
+        <Card title="Classification" value="98.2%" subtitle="model confidence" />
+        <Card title="Duplicates" value="342" subtitle="clusters detected" />
+        <Card title="Compliance Flags" value="54" subtitle="requires review" />
+      </div>
+    </LayoutShell>
   );
 }
